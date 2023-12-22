@@ -3,7 +3,7 @@ import type { AppType, AppProps } from "next/app";
 import type { NextPage } from "next";
 import type { ReactElement, ReactNode } from "react";
 
-import { DefaultLayout } from "~/components/DefaultLayout";
+import { DefaultLayout } from "~/components/Layouts/DefaultLayout";
 import { trpc } from "~/utils/trpc";
 import withTheme from "~/theme";
 
