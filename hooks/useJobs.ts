@@ -17,6 +17,7 @@ export const useJobs = () => {
             await utils.job.list.invalidate();
         },
     });
+
     const { mutateAsync: assginTranslatorAsync, isLoading: isAssginingTranslator } = trpc.job.assginTranslator.useMutation({
         async onSuccess() {
             // refetches jobs after a job is update

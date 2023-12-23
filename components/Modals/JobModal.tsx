@@ -3,6 +3,7 @@ import { Modal, Form, Input, Upload, Button, message, Tabs } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
 import { RcFile } from "antd/es/upload";
 import { useJobs } from "~/hooks/useJobs";
+import { trpc } from "~/utils/trpc";
 
 interface AddJobModalProps {
   open: boolean;
@@ -11,9 +12,10 @@ interface AddJobModalProps {
 
 const AddJobModal: React.FC<AddJobModalProps> = ({ open, onCancel }) => {
   const [form] = Form.useForm();
-  const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = useState<any>();
   const [activeKey, setActiveKey] = useState("details");
   const { addJobAsync, isAddingJob } = useJobs();
+  const utils = trpc.useUtils();
 
   const handleTabChange = (key: string) => {
     setActiveKey(key);
@@ -28,13 +30,40 @@ const AddJobModal: React.FC<AddJobModalProps> = ({ open, onCancel }) => {
     }
   };
 
+  const handleFileUpload = async (customerName?: string) => {
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/jobs/CreateJobWithFile?customer=${customerName ?? ""}`,
+        {
+          method: "POST",
+          headers: {},
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        console.error("Error:", response.statusText);
+        return;
+      }
+
+      await utils.job.list.invalidate();
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
       if (activeKey === "details") {
         await addJobAsync(values);
       } else {
-        // await addJobByFileAsync(values);
+        await handleFileUpload(values.customerName);
       }
 
       await handleClose();
@@ -98,17 +127,26 @@ const AddJobModal: React.FC<AddJobModalProps> = ({ open, onCancel }) => {
                   <Upload
                     multiple={false}
                     beforeUpload={beforeUpload}
-                    customRequest={({ file, onSuccess }) => {
-                      setTimeout(() => {
-                        // onSuccess();
-                      }, 0);
-                    }}
                     showUploadList={false}
                     onChange={handleFileChange}
                   >
                     <Button icon={<InboxOutlined />}>Click to Upload</Button>
                   </Upload>
                 </Form.Item>
+                {file?.name?.split(".")?.pop()?.toLowerCase() === "txt" && (
+                  <Form.Item
+                    label="Customer Name"
+                    name="customerName"
+                    rules={[
+                      {
+                        required: activeKey === "upload",
+                        message: "Please enter the Customer Name",
+                      },
+                    ]}
+                  >
+                    <Input />
+                  </Form.Item>
+                )}
               </Form>
             ),
           },

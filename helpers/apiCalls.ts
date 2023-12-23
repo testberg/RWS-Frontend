@@ -72,4 +72,6 @@ async function deleteData(url: string) {
 
 }
 
-export { fetchData, createData, updateData, deleteData, patchData }
+export {
+    fetchData, createData, updateData, deleteData, patchData,
+}

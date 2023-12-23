@@ -4,7 +4,10 @@
  */
 import { router, publicProcedure } from '../trpc';
 import { z } from 'zod';
-import { createData, deleteData, fetchData, patchData } from '~/helpers/apiCalls';
+import {
+    createData, deleteData, fetchData, patchData,
+    //uploadData
+} from '~/helpers/apiCalls';
 import { TranslationJob } from '~/types';
 
 /**
@@ -27,20 +30,6 @@ export const jobRouter = router({
         )
         .mutation(async ({ input }) => {
             return await createData<TranslationJob>(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/CreateJob`, JSON.stringify(input))
-        }),
-    addFile: publicProcedure
-        .input(
-            z.object({
-                id: z.string().uuid().optional(),
-            }),
-        )
-        .mutation(async ({ input }) => {
-            const job = {}
-            // await prisma.job.create({
-            //     data: input,
-            //     select: defaultjobSelect,
-            // });
-            return job;
         }),
     delete: publicProcedure
         .input(
