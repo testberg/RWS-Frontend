@@ -5,7 +5,7 @@
 import { router, publicProcedure } from '../trpc';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { createData, deleteData, fetchData } from '~/helpers/translationManagementService';
+import { createData, deleteData, fetchData } from '~/helpers/apiCalls';
 import { Translator } from '~/types';
 
 /**

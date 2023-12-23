@@ -1,18 +1,34 @@
 import { Button, Flex, Space, Table, Tag, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import AddJobModal from "../Modals/JobModal";
 import { useJobs } from "~/hooks/useJobs";
-import { TranslationJob } from "~/types";
+import { TranslationJob, Translator } from "~/types";
 import DeleteModal from "../Modals/Shared/DeleteModal";
+import AssignTranslatorModal from "../Modals/AssignTranslatorModal";
+import { useTranslators } from "~/hooks/useTranslators";
+
+type JobListingsState = {
+  record?: TranslationJob;
+  action?: "create" | "delete" | "assign";
+};
 
 const { Title } = Typography;
 
 const JobListings = () => {
-  const [openAddModalJob, setOpenAddModalJob] = useState(false);
-  const [selectedRecordId, setSelectedRecordId] = useState("");
+  const [state, setState] = useState<JobListingsState>();
 
   const { jobs } = useJobs();
+  const { translators } = useTranslators();
+
+  const translatorIndex = useMemo(() => {
+    const indexById: { [key: string]: Translator } = {};
+    translators?.forEach((translator) => {
+      indexById[translator.id] = translator;
+    });
+    return indexById;
+  }, [translators]);
+
   const columns: ColumnsType<TranslationJob> = [
     {
       title: "Customer Name",
@@ -38,7 +54,10 @@ const JobListings = () => {
       title: "Translator",
       dataIndex: "translatorId",
       key: "translatorId",
-      // render: (translatorId) => translators.find((t) => (t.id = translatorId)),
+      render: (_, { translatorId }) => {
+        if (!translatorId) return null;
+        return <Typography>{translatorIndex[translatorId]?.name}</Typography>;
+      },
     },
     {
       title: "Status",
@@ -72,12 +91,25 @@ const JobListings = () => {
             key={"delete"}
             danger
             onClick={() => {
-              setSelectedRecordId(record.id);
+              setState({
+                record,
+                action: "delete",
+              });
             }}
           >
             Delete
           </Button>
-          <Button key={"assign"}>Assign</Button>
+          <Button
+            onClick={() => {
+              setState({
+                record,
+                action: "assign",
+              });
+            }}
+            key={"assign"}
+          >
+            Assign
+          </Button>
         </Space>
       ),
     },
@@ -89,7 +121,11 @@ const JobListings = () => {
         <Title>{"Jobs"}</Title>
         <Button
           style={{ marginTop: 15, marginLeft: 15 }}
-          onClick={() => setOpenAddModalJob(true)}
+          onClick={() =>
+            setState({
+              action: "create",
+            })
+          }
         >
           Add
         </Button>
@@ -101,15 +137,22 @@ const JobListings = () => {
         dataSource={jobs}
       />
       <AddJobModal
-        open={openAddModalJob}
-        onCancel={() => setOpenAddModalJob(false)}
+        open={state?.action === "create"}
+        onCancel={() => setState(undefined)}
       />
       <DeleteModal
-        id={selectedRecordId}
-        open={!!selectedRecordId}
+        id={state?.record?.id}
+        open={state?.action === "delete"}
         sourceName={"Job"}
         onCancel={() => {
-          setSelectedRecordId("");
+          setState(undefined);
+        }}
+      />
+      <AssignTranslatorModal
+        initialData={state?.record}
+        open={state?.action === "assign"}
+        onCancel={() => {
+          setState(undefined);
         }}
       />
     </Flex>

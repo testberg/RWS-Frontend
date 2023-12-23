@@ -1,12 +1,12 @@
 import React from "react";
-import { Button, Modal, Typography } from "antd";
+import { Modal, Typography } from "antd";
 import { useJobs } from "~/hooks/useJobs";
 import { useTranslators } from "~/hooks/useTranslators";
 
 interface DeleteModalProps {
   open: boolean;
   sourceName: string;
-  id: string;
+  id?: string;
   onCancel: () => void;
 }
 
@@ -19,6 +19,16 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
   const { isDeletingJob, deleteJobAsync } = useJobs();
   const { isDeletingTranslator, deleteTranslatorAsync } = useTranslators();
 
+  const onOk = async () => {
+    if (!id) return;
+    if (sourceName === "Job") {
+      await deleteJobAsync({ id });
+    } else {
+      await deleteTranslatorAsync({ id });
+    }
+    onCancel();
+  };
+
   return (
     <Modal
       open={open}
@@ -28,14 +38,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
       title={`Delete ${sourceName}`}
       confirmLoading={isDeletingJob || isDeletingTranslator}
       onCancel={onCancel}
-      onOk={async () => {
-        if (sourceName === "Job") {
-          await deleteJobAsync({ id });
-        } else {
-          await deleteTranslatorAsync({ id });
-        }
-        onCancel();
-      }}
+      onOk={onOk}
     >
       <Typography>{`Are you sure to delete this ${sourceName}?`}</Typography>
     </Modal>

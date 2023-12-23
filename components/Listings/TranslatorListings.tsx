@@ -5,11 +5,16 @@ import { Translator } from "~/types";
 import TranslatorModal from "../Modals/TranslatorModal";
 import { useState } from "react";
 import DeleteModal from "../Modals/Shared/DeleteModal";
+
+type TranslatorListingsState = {
+  record?: Translator;
+  action?: "create" | "delete";
+};
+
 const { Title } = Typography;
 
 const TranslatorListings = () => {
-  const [openTranslatorModal, setOpenTranslatorModal] = useState(false);
-  const [selectedRecordId, setSelectedRecordId] = useState("");
+  const [state, setState] = useState<TranslatorListingsState>();
 
   const { translators } = useTranslators();
 
@@ -61,7 +66,7 @@ const TranslatorListings = () => {
           <Button
             disabled={record.status === "Deleted"}
             danger
-            onClick={() => setSelectedRecordId(record.id)}
+            onClick={() => setState({ record, action: "delete" })}
           >
             Delete
           </Button>
@@ -75,7 +80,7 @@ const TranslatorListings = () => {
       <Flex align="center">
         <Title>{"Translators"}</Title>
         <Button
-          onClick={() => setOpenTranslatorModal(true)}
+          onClick={() => setState({ action: "create" })}
           style={{ marginTop: 15, marginLeft: 15 }}
         >
           Add
@@ -88,15 +93,15 @@ const TranslatorListings = () => {
         dataSource={translators}
       />
       <TranslatorModal
-        open={openTranslatorModal}
-        onCancel={() => setOpenTranslatorModal(false)}
+        open={state?.action === "create"}
+        onCancel={() => setState(undefined)}
       />
       <DeleteModal
-        id={selectedRecordId}
-        open={!!selectedRecordId}
+        id={state?.record?.id}
+        open={state?.action === "delete"}
         sourceName={"Translator"}
         onCancel={() => {
-          setSelectedRecordId("");
+          setState(undefined);
         }}
       />
     </Flex>

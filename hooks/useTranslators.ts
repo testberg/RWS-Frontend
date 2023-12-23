@@ -14,7 +14,7 @@ export const useTranslators = () => {
 
     const { mutateAsync: addTranslatorAsync, isLoading: isAddingTranslator } = trpc.translator.add.useMutation({
         async onSuccess() {
-            // refetches translator after a translator is deleted
+            // refetches translator after a translator is added
             await utils.translator.list.invalidate();
         },
     });

@@ -4,7 +4,7 @@
  */
 import { router, publicProcedure } from '../trpc';
 import { z } from 'zod';
-import { createData, deleteData, fetchData } from '~/helpers/translationManagementService';
+import { createData, deleteData, fetchData, patchData } from '~/helpers/apiCalls';
 import { TranslationJob } from '~/types';
 
 /**
@@ -51,4 +51,15 @@ export const jobRouter = router({
         .mutation(async ({ input }) => {
             await deleteData(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/DeleteJob/${input.id}`)
         }),
+    assginTranslator: publicProcedure
+        .input(
+            z.object({
+                jobId: z.string().uuid(),
+                translatorId: z.string().uuid()
+            }),
+        )
+        .mutation(async ({ input }) => {
+            const { translatorId, jobId } = input
+            await patchData(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/UpdateJobTranslator/${jobId}?translatorId=${translatorId}`)
+        })
 });

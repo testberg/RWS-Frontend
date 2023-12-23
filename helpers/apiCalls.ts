@@ -29,18 +29,39 @@ async function createData<T>(url: string, raw: string): Promise<T> {
     return data;
 }
 
-async function updatehData<T>(url: string): Promise<T> {
-    const response = await fetch(url, { method: 'PUT' });
+async function updateData(url: string) {
+    var myHeaders = new Headers();
+    myHeaders.append("accept", "*/*");
+
+    var requestOptions = {
+        method: 'PUT',
+        headers: myHeaders,
+    };
+
+    const response = await fetch(url, requestOptions);
 
     if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
     }
-
-    const data: T = await response.json();
-    return data;
 }
 
-async function deleteData<T>(url: string) {
+async function patchData(url: string) {
+    var myHeaders = new Headers();
+    myHeaders.append("accept", "*/*");
+
+    var requestOptions = {
+        method: 'PATCH',
+        headers: myHeaders,
+    };
+
+    const response = await fetch(url, requestOptions);
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+}
+
+async function deleteData(url: string) {
     const response = await fetch(url, {
         method: 'Delete'
     });
@@ -51,4 +72,4 @@ async function deleteData<T>(url: string) {
 
 }
 
-export { fetchData, createData, updatehData, deleteData }
+export { fetchData, createData, updateData, deleteData, patchData }
